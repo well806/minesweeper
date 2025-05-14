@@ -1,0 +1,26 @@
+package minesweeper;
+
+class Cell {
+    boolean isTrap;
+    boolean isRevealed;
+    int nearTraps;
+
+    Cell() {
+        this.isTrap = false;
+        this.isRevealed = false;
+        this.nearTraps = 0;
+    }
+
+    @Override
+    public String toString() {
+        if (!isRevealed) {
+            return "#";
+        }
+        if (isTrap) {
+            return "*";
+        } else {
+            return String.valueOf(nearTraps);
+        }
+    }
+
+}
