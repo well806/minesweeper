@@ -1,0 +1,128 @@
+package minesweeper;
+import java.util.*;
+
+class Board {
+    private final int rows;
+    private final int cols;
+    private final Cell[][] grid;
+    private final List<int[]> traps;
+    private final Random random = new Random();
+
+    Board(int rows, int cols, int trapCount) {
+        this.rows = rows;
+        this.cols = cols;
+        this.grid = new Cell[rows][cols];
+        this.traps = new ArrayList<>();
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                grid[i][j] = new Cell();
+            }
+        }
+
+        placeTraps(trapCount);
+        updateHelp();
+    }
+
+    private void placeTraps(int trapCount) {
+        int trapsPlaced = 0;
+
+        while (trapsPlaced < trapCount) {
+            int x = random.nextInt(rows);
+            int y = random.nextInt(cols);
+
+            if (!grid[x][y].isTrap) {
+                grid[x][y].isTrap = true;
+                traps.add(new int[]{x, y});
+                trapsPlaced++;
+            }
+        }
+    }
+
+
+    private void updateHelp() {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (!grid[i][j].isTrap) {
+                    grid[i][j].nearTraps = countNearTraps(i, j);
+                }
+            }
+        }
+    }
+
+    private int countNearTraps(int x, int y) {
+        int count = 0;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                int nx = x + dx, ny = y + dy;
+                if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && grid[nx][ny].isTrap) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public boolean revealCell(int x, int y) {
+        if (x < 0 ||  x >= rows || y < 0 ||  y >= cols ||  grid[x][y].isRevealed) {
+            System.out.println("Некорректный ввод. Попробуйте снова.");
+            return false;
+        }
+
+        grid[x][y].isRevealed = true;
+        if (grid[x][y].isTrap) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean allSafeCellsRevealed() {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (!grid[i][j].isTrap && !grid[i][j].isRevealed) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public void moveTraps() {
+        List<int[]> newPositions = new ArrayList<>();
+        for (int[] trap : traps) {
+            int x = trap[0], y = trap[1];
+            grid[x][y].isTrap = false;
+
+            int nx, ny;
+            do {
+                nx = random.nextInt(rows);
+                ny = random.nextInt(cols);
+            } while (grid[nx][ny].isTrap || grid[nx][ny].isRevealed);
+
+            grid[nx][ny].isTrap = true;
+            newPositions.add(new int[]{nx, ny});
+        }
+        traps.clear();
+        traps.addAll(newPositions);
+        updateHelp();
+        System.out.println("Ловушки переместились!");
+    }
+
+    public void printBoard(boolean revealTraps) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (revealTraps) {
+                    if (grid[i][j].isTrap) {
+                        System.out.print("* ");
+                    } else {
+                        System.out.print(grid[i][j] + " ");
+                    }
+                } else {
+                    System.out.print(grid[i][j] + " ");
+                }
+            }
+            System.out.println();
+        }
+    }
+}
