@@ -1,0 +1,40 @@
+package minesweeper;
+import java.util.*;
+
+public class Game {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Добро пожаловать в игру! Введите желаемый размер игрового поля (пример: 5 5)");
+        int rows = scanner.nextInt();
+        int cols = scanner.nextInt();
+        int trapCount = (rows * cols) / 10;
+        int moveInterval = 3, moves = 0;
+        Board board = new Board(rows, cols, trapCount);
+
+        while (1 > 0) {
+            board.printBoard(false);
+            System.out.print("Введите координаты клетки, которую хотите открыть (x y): ");
+            int x = scanner.nextInt() - 1;
+            int y = scanner.nextInt() - 1;
+
+            if (board.revealCell(x, y)) {
+                System.out.println("Вы попали в ловушку! Игра окончена.");
+                board.printBoard(true);
+                break;
+            }
+
+            if (board.allSafeCellsRevealed()) {
+                System.out.println("Поздравляем! Вы открыли все безопасные клетки и победили!");
+                board.printBoard(true);
+                break;
+            }
+
+            moves++;
+            if (moves % moveInterval == 0) {
+                board.moveTraps();
+            }
+        }
+
+        scanner.close();
+    }
+}
